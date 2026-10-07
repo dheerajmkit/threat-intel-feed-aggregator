@@ -1,0 +1,7 @@
+type,value,first_seen,last_seen,tags
+ip,203.0.113.5,2026-09-29T00:00:00Z,2026-10-06T00:00:00Z,phishing;c2
+ip,198.51.100.77,2026-09-26T00:00:00Z,2026-10-05T00:00:00Z,brute-force
+domain,phish-kit.example.net,2026-09-27T00:00:00Z,2026-10-04T00:00:00Z,phishing
+domain,malware-test.example,2026-09-30T00:00:00Z,2026-10-06T00:00:00Z,malware
+url,https://phish-kit.example.net/login?ref=1,2026-09-27T00:00:00Z,2026-10-04T00:00:00Z,phishing
+hash,aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,2026-09-25T00:00:00Z,2026-10-03T00:00:00Z,worm
