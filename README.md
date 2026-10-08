@@ -44,11 +44,13 @@ feeds=2 records=16 unique=13 skipped=2 -> feed.json
       "sightings": 2,
       "sources": ["feed1", "feed2"],
       "tags": ["c2", "phishing"],
-      "score": 0.0
+      "score": 89.53
     }
   ]
 }
 ```
+
+IOCs in `feed.json` are sorted by score (highest first).
 
 ## Supported feed formats
 
@@ -67,11 +69,47 @@ the file stem.
   normalization/validation (`ipaddress` for IPs, regex for domains,
   `urllib` for URLs, hex/length checks for hashes), cross-feed dedup
   with merged sightings and observation windows, unified JSON output.
-- **Day 2 — scoring and expiry** *(planned)*. Feed-reliability weights,
-  recency decay, sighting-count boosts, TTL-based expiry, plain-text
-  blocklist export, pytest suite.
+- **Day 2 — scoring, expiry, blocklist.** Feed-reliability weights,
+  recency decay, sighting-count boosts (`threatintel/score.py`),
+  TTL-based expiry per IOC type (`threatintel/expire.py`), plain-text
+  blocklist export for firewall/proxy ingestion, and a pytest suite in
+  `tests/`.
 - **Day 3 — exchange formats and reporting** *(planned)*. STIX 2.1
   bundle export, Markdown summary report, CI workflow, usage docs.
+
+## Scoring
+
+Each IOC scores 0–100:
+
+```
+score = 100 × feed_weight × 0.5^(age_days / 30) + min(sightings × 2, 20)
+```
+
+`feed_weight` is the most trusted source's weight from
+`threatintel/config.py` (unknown feeds default to 0.5). Override
+weights with `--weights weights.json`, pin "now" for reproducible runs
+with `--now 2026-10-07T00:00:00Z`.
+
+## Expiry and blocklist
+
+IOCs older than their type's TTL (IP/domain 30d, URL 14d, hash 90d;
+override with `--ttl-days`) are excluded from outputs and counted in
+`meta.expired_count`. Export a blocklist of active IOCs:
+
+```bash
+python3 aggregate.py samples/*.json samples/*.csv \
+    --blocklist blocklist.txt --min-score 40 --now 2026-10-07T00:00:00Z
+```
+
+The blocklist holds IPs and domains (URLs reduce to their host);
+hashes have no network-blocklist representation and are skipped.
+
+## Tests
+
+```bash
+pip install -r requirements.txt   # pytest
+python3 -m pytest tests/ -q
+```
 
 ## Normalization rules
 
